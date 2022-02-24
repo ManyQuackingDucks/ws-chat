@@ -1,6 +1,6 @@
 table! {
-    users () {
+    users (username) {
         username -> Text,
-        hash -> Text,
+        pass_hash -> Text,
     }
 }

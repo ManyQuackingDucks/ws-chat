@@ -1,9 +1,12 @@
+mod db;
+mod types;
+#[macro_use]
+extern crate diesel;
 use futures_util::{sink::SinkExt, StreamExt};
 use tokio::{sync::broadcast, net::{TcpStream, TcpListener}};
 use tokio_tungstenite as wshandler;
 use wshandler::tungstenite::Message;
 
-mod types;
 const MAX_CHAT_BUFFER: usize = 16;
 
 
