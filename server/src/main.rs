@@ -29,7 +29,10 @@ async fn client_init(conn: wshandler::WebSocketStream<TcpStream>, txch: broadcas
     let (mut tx, mut rx) = conn.split();
     let config = rx.next().await.unwrap()?;
     let userdata: types::LoginUser = serde_json::from_str(&config.to_string())?;
-    let user = db::auth_user(&db_conn, userdata).unwrap();
+    let user =  match db::auth_user(&db_conn, userdata){
+        Some(e)=> e,
+        None => return Ok(())
+    };
     tx.send(Message::Text(format!("Logged in as: {}", user.username))).await?;
     let p = tokio::spawn(client_send(tx, txch.subscribe()));
     match client_recv(rx, txch, &user).await {
