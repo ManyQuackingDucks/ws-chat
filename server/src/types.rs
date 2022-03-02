@@ -17,3 +17,9 @@ pub struct LoggedInUser {
     pub username: String,
     pub admin: bool,
 }
+
+#[derive(Deserialize)]
+pub struct FromClient{
+    pub command: String,
+    pub args: Vec<String>,
+}

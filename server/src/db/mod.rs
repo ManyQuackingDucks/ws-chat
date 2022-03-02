@@ -3,7 +3,7 @@ pub mod scheme;
 
 use diesel::r2d2::Pool;
 use model::User;
-
+use tokio::task;
 use diesel::prelude::*;
 use diesel::r2d2::Builder;
 use diesel::r2d2::ConnectionManager;
@@ -14,10 +14,12 @@ use self::scheme::users;
 pub type ConnType =
     diesel::r2d2::PooledConnection<diesel::r2d2::ConnectionManager<diesel::SqliteConnection>>;
 
-pub fn establish_connection() -> Pool<ConnectionManager<SqliteConnection>> {
-    Builder::new()
-        .build(ConnectionManager::new("file:db.sqlite"))
-        .expect("Could not create pool")
+pub async fn establish_connection() -> Pool<ConnectionManager<SqliteConnection>> {
+    task::spawn_blocking(||{
+        Builder::new()
+            .build(ConnectionManager::new("file:db.sqlite"))
+            .expect("Could not create pool")
+    }).await.expect("Could not do stuff")
 }
 #[allow(dead_code)]
 pub fn create_user(
@@ -32,7 +34,6 @@ pub fn create_user(
         pass_hash,
         admin,
     };
-
     diesel::insert_into(scheme::users::table)
         .values(&new_user)
         .execute(conn)?;
