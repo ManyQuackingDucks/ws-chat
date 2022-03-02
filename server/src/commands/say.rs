@@ -10,12 +10,12 @@ impl Say{
 
 impl<'a> Command<'a> for Say{
     fn execute(&self, _: &ConnType, args: &[String]) -> anyhow::Result<String> {
-        let resp: String = args.join("");
+        let resp: String = args.join(" ");
         Ok(resp)
     }
 
     fn help(&self) -> &'a str{
-        " " //say doesnt need help
+        "" //say doesnt need help
     }
     
     fn permission(&self) -> bool {
