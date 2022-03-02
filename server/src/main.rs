@@ -66,7 +66,11 @@ async fn client_recv(
     let commands = commands::Commands::new();
     while let Some(Ok(new_mes)) = rx.next().await {
         let unencoded: types::FromClient = serde_json::from_str(&new_mes.to_string())?;
-        let mes = commands.exec_command(&dbconn, &unencoded, userdata.admin).unwrap();
+        let mes = match commands.exec_command(&dbconn, &unencoded, userdata.admin){
+            Ok(n) => n,
+            Err(e) => format!("err: {e}"),
+        };
+
         txch.send(format!("{}: {}", userdata.username, mes))?;
     }
     Ok(())
