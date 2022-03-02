@@ -23,7 +23,7 @@ async fn main() {
 
     loop {
         //hopefully cant panic but probably can FIX THIS
-        let client = listener.accept().await.unwrap();
+        let client = listener.accept().await.unwrap(); 
         match wshandler::accept_async(client.0).await {
             Ok(wsstream) => conn_threads.push(tokio::spawn(client_init(
                 wsstream,
