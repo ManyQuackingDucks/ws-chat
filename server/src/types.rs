@@ -19,7 +19,7 @@ pub struct LoggedInUser {
 }
 
 #[derive(Deserialize)]
-pub struct FromClient{
+pub struct FromClient {
     pub command: String,
     pub args: Vec<String>,
 }

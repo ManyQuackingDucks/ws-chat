@@ -1,12 +1,12 @@
 pub mod model;
 pub mod scheme;
 
-use diesel::r2d2::Pool;
-use model::User;
-use tokio::task;
 use diesel::prelude::*;
 use diesel::r2d2::Builder;
 use diesel::r2d2::ConnectionManager;
+use diesel::r2d2::Pool;
+use model::User;
+use tokio::task;
 
 use self::model::InsertUser;
 use self::scheme::users;
@@ -15,19 +15,16 @@ pub type ConnType =
     diesel::r2d2::PooledConnection<diesel::r2d2::ConnectionManager<diesel::SqliteConnection>>;
 
 pub async fn establish_connection() -> Pool<ConnectionManager<SqliteConnection>> {
-    task::spawn_blocking(||{
+    task::spawn_blocking(|| {
         Builder::new()
             .build(ConnectionManager::new("file:db.sqlite"))
             .expect("Could not create pool")
-    }).await.expect("Could not do stuff")
+    })
+    .await
+    .expect("Could not do stuff")
 }
 #[allow(dead_code)]
-pub fn create_user(
-    conn: &ConnType,
-    user: &str,
-    pass: &str,
-    admin: bool,
-) -> anyhow::Result<()> {
+pub fn create_user(conn: &ConnType, user: &str, pass: &str, admin: bool) -> anyhow::Result<()> {
     let pass_hash = pass; //Replace with hashing function
     let new_user = InsertUser {
         username: user,

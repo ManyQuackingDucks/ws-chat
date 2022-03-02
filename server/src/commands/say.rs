@@ -1,23 +1,23 @@
 use super::Command;
 use super::ConnType;
-pub struct Say{ }
+pub(super) struct Say {}
 
-impl Say{
-    pub const fn new() -> Self{
-        Self {}
+impl Say {
+    pub(super) fn new() -> Box<Self> {
+        Box::new(Self {})
     }
 }
 
-impl<'a> Command<'a> for Say{
+impl Command for Say {
     fn execute(&self, _: &ConnType, args: &[String]) -> anyhow::Result<String> {
         let resp: String = args.join(" ");
         Ok(resp)
     }
 
-    fn help(&self) -> &'a str{
+    fn help(&self) -> &'static str {
         "" //say doesnt need help
     }
-    
+
     fn permission(&self) -> bool {
         false
     }
