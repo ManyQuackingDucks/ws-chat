@@ -9,9 +9,9 @@ impl Say {
 }
 
 impl Command for Say {
-    fn execute(&self, _: &ConnType, args: &[String]) -> anyhow::Result<String> {
+    fn execute(&self, _: &ConnType, args: &[String], username: String) -> anyhow::Result<crate::types::ChannelMes> {
         let resp: String = args.join(" ");
-        Ok(resp)
+        Ok(crate::types::ChannelMes { user: None, data: format!("{username}:{resp}")})
     }
 
     fn help(&self) -> &'static str {

@@ -5,7 +5,7 @@ mod say;
 
 use crate::db::ConnType;
 trait Command {
-    fn execute(&self, dbconn: &ConnType, args: &[String]) -> anyhow::Result<String>;
+    fn execute(&self, dbconn: &ConnType, args: &[String], username: String) -> anyhow::Result<crate::types::ChannelMes>;
     fn help(&self) -> &'static str;
     fn permission(&self) -> bool;
 }
@@ -30,10 +30,11 @@ impl Commands {
         dbconn: &ConnType,
         mes: &crate::types::FromClient,
         perm_level: bool,
-    ) -> anyhow::Result<String> {
+        username: String,
+    ) -> anyhow::Result<crate::types::ChannelMes> {
         match self.commands.get(&mes.command as &str) {
             Some(comm) if perm_level == comm.permission() || !comm.permission() => {
-                comm.execute(dbconn, &mes.args)
+                comm.execute(dbconn, &mes.args, username)
             }
             Some(_) => Err(anyhow::Error::msg("Requires admin privleges")),
             None => Err(anyhow::Error::msg("Command not found")),

@@ -23,3 +23,8 @@ pub struct FromClient {
     pub command: String,
     pub args: Vec<String>,
 }
+#[derive(Clone, Debug)]
+pub struct ChannelMes{
+    pub user: Option<String>,
+    pub data: String,
+}

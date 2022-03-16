@@ -9,8 +9,8 @@ impl Example {
 }
 
 impl Command for Example {
-    fn execute(&self, _: &ConnType, _: &[String]) -> anyhow::Result<String> {
-        Ok("An example function".to_string())
+    fn execute(&self, _: &ConnType, _: &[String], username: String) -> anyhow::Result<crate::types::ChannelMes> {
+        Ok(crate::types::ChannelMes {user: Some(username), data: "An example function".to_string()})
     }
 
     fn help(&self) -> &'static str {
