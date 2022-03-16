@@ -5,22 +5,28 @@ mod say;
 
 use crate::db::ConnType;
 trait Command {
-    fn execute(&self, dbconn: &ConnType, args: &[String], username: String) -> anyhow::Result<crate::types::ChannelMes>;
+    fn execute(
+        &self,
+        dbconn: &ConnType,
+        args: &[String],
+        username: String,
+    ) -> anyhow::Result<crate::types::ChannelMes>;
     fn help(&self) -> &'static str;
     fn permission(&self) -> bool;
 }
 
-pub struct Commands {
-    commands: FnvHashMap<&'static str, Box<dyn Command>>,
+pub struct Commands<'a> {
+    commands: FnvHashMap<&'a str, Box<(dyn Command + 'a)>>,
 }
 
 //Should be safe to send across threads since the mutex is only modified on creation
 #[allow(clippy::non_send_fields_in_send_ty)]
-unsafe impl Send for Commands {}
-
-impl Commands {
+unsafe impl<'a> Send for Commands<'a> {}
+//Should be safe to send across threads since the mutex is only modified on creation
+unsafe impl<'a> Sync for Commands<'a> {}
+impl<'a> Commands<'a> {
     pub fn new() -> Self {
-        let mut commands: FnvHashMap<&'static str, Box<dyn Command>> = FnvHashMap::default();
+        let mut commands: FnvHashMap<&'a str, Box<(dyn Command +'a)>> = FnvHashMap::default();
         commands.insert("example", example::Example::new());
         commands.insert("say", say::Say::new());
         Self { commands }

@@ -1,5 +1,5 @@
 #![warn(clippy::nursery, clippy::pedantic)]
-const SERVER_DB_URL: &'static str = "file:db.sqlite"; //Where the sqlite db is.
+const SERVER_DB_URL: &str = "file:db.sqlite"; //Where the sqlite db is.
 const MAX_CHAT_BUFFER: usize = 16; //How many messages can be in a queue at a time.
 mod commands;
 mod db;
@@ -13,7 +13,6 @@ use tokio::{
 };
 use tokio_tungstenite as wshandler;
 use wshandler::tungstenite::Message;
-
 
 #[tokio::main(flavor = "multi_thread")]
 async fn main() {
@@ -42,7 +41,7 @@ async fn client_init(
     let (mut tx, mut rx) = conn.split();
     let creds = rx.next().await.unwrap()?;
     let userdata: types::LoginUser = serde_json::from_str(&creds.to_string())?;
-    let user = match db::auth_user(db_conn.get().await.unwrap(), userdata).await{
+    let user = match db::auth_user(db_conn.get().await.unwrap(), userdata).await {
         Some(e) => e,
         None => return Ok(()),
     };
@@ -67,22 +66,34 @@ async fn client_recv(
     while let Some(Ok(new_mes)) = rx.next().await {
         let username = userdata.username.clone();
         let unencoded: types::FromClient = serde_json::from_str(&new_mes.to_string())?;
-        let mes = match commands.exec_command(dbconn.get().await.unwrap(), &unencoded, userdata.admin, username.clone()) {
+        let mes = match commands.exec_command(
+            &dbconn.get().await.unwrap(),
+            &unencoded,
+            userdata.admin,
+            username.clone(),
+        ) {
             Ok(n) => n,
-            Err(e) => types::ChannelMes { user: Some(username), data: e.to_string()},
+            Err(e) => types::ChannelMes {
+                user: Some(username),
+                data: e.to_string(),
+            },
         };
         txch.send(mes)?;
     }
     Ok(())
 }
 
-async fn client_send(mut conn: types::SplitSink, mut rx: broadcast::Receiver<crate::types::ChannelMes>, username: String) {
+async fn client_send(
+    mut conn: types::SplitSink,
+    mut rx: broadcast::Receiver<crate::types::ChannelMes>,
+    username: String,
+) {
     loop {
         let latest_mes = rx.recv().await.unwrap(); //Disconnect clients if can not get from the client thingy
-        if latest_mes.user == Some(username.clone()){
+        if latest_mes.user == Some(username.clone()) {
             conn.send(Message::Text(latest_mes.data)).await.unwrap();
         } else if latest_mes.user == None {
-             conn.send(Message::Text(latest_mes.data)).await.unwrap();
+            conn.send(Message::Text(latest_mes.data)).await.unwrap();
         }
     }
 }
